@@ -5,10 +5,6 @@ import kotlin.math.max
 import kotlin.math.min
 
 
-enum class Direction {
-    L, R, U, D
-}
-
 typealias Point = Pair<Int, Int>
 operator fun Point.plus(x: Point): Point = Point(this.first + x.first, this.second + x.second)
 fun Point.distance(): Int = abs(this.first) + abs(this.second)
@@ -17,22 +13,19 @@ val Point.x: Int
 val Point.y: Int
     get() = this.second
 
-
 typealias Line = Pair<Point, Point>
 fun Line.getXRange(): Pair<Int, Int> = Pair(min(this.first.x, this.second.x), max(this.first.x, this.second.x))
 fun Line.getYRange(): Pair<Int, Int> = Pair(min(this.first.y, this.second.y), max(this.first.y, this.second.y))
 
+enum class Direction { L, R, U, D }
 typealias Displacement = Pair<Direction, Int>
-fun Displacement.apply(x: Point): Point {
-    val dx: Point = when(this.first) {
-        Direction.L -> Point(-this.second, 0)
-        Direction.R -> Point(this.second, 0)
-        Direction.U -> Point(0, this.second)
-        Direction.D -> Point(0, -this.second)
-    }
-
-    return x + dx
+fun Displacement.apply(x: Point): Point = when(this.first) {
+    Direction.L -> x + Point(-this.second, 0)
+    Direction.R -> x + Point(this.second, 0)
+    Direction.U -> x + Point(0, this.second)
+    Direction.D -> x + Point(0, -this.second)
 }
+
 
 fun toDisplacement(input: String): Displacement {
     val direction: Direction = when(val firstChar = input.substring(0, 1)) {
