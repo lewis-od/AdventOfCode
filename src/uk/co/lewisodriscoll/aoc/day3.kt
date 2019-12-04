@@ -8,6 +8,7 @@ import kotlin.math.min
 typealias Point = Pair<Int, Int>
 operator fun Point.plus(x: Point): Point = Point(this.first + x.first, this.second + x.second)
 fun Point.distance(): Int = abs(this.first) + abs(this.second)
+fun Point.distance(p: Point): Int = abs(this.x - p.x) + abs(this.y - p.y)
 val Point.x: Int
     get() = this.first
 val Point.y: Int
@@ -19,12 +20,13 @@ fun Line.getYRange(): Pair<Int, Int> = Pair(min(this.first.y, this.second.y), ma
 
 enum class Direction { L, R, U, D }
 typealias Displacement = Pair<Direction, Int>
-fun Displacement.apply(x: Point): Point = when(this.first) {
-    Direction.L -> x + Point(-this.second, 0)
-    Direction.R -> x + Point(this.second, 0)
-    Direction.U -> x + Point(0, this.second)
-    Direction.D -> x + Point(0, -this.second)
+fun Displacement.toPoint(): Point = when(this.first) {
+    Direction.L -> Point(-this.second, 0)
+    Direction.R -> Point(this.second, 0)
+    Direction.U -> Point(0, this.second)
+    Direction.D -> Point(0, -this.second)
 }
+fun Displacement.apply(x: Point): Point = x + this.toPoint()
 
 
 fun toDisplacement(input: String): Displacement {
@@ -87,7 +89,7 @@ fun main() {
 
             val intersection: Point? = if (isHorizontal(line1)) findIntersection(line1, line2) else findIntersection(line2, line1)
 
-            if (intersection == null) continue
+            if (intersection == null || (intersection.x == 0 && intersection.y == 0)) continue
 
             if (closestIntersection == null || intersection.distance() < closestIntersection.distance()) {
                 closestIntersection = intersection
@@ -100,5 +102,55 @@ fun main() {
         println("Distance: ${closestIntersection.distance()}")
     } else {
         println("No intersection found")
+    }
+
+    var leastStepsIntersection: Point? = null
+    var leastNumberSteps: Int? = null
+    for (i in 0 until wire1.size - 1) {
+        for (j in 0 until wire2.size - 1) {
+            val line1: Line = Line(wire1[i], wire1[i + 1])
+            val line2: Line = Line(wire2[j], wire2[j + 1])
+
+            if ((isHorizontal(line1) && isHorizontal(line2)) || (isVertical(line1) && isVertical(line2))) {
+                continue
+            }
+
+            val intersection: Point? = if (isHorizontal(line1)) findIntersection(line1, line2) else findIntersection(line2, line1)
+
+            if (intersection == null || (intersection.x == 0 && intersection.y == 0)) continue
+
+            val wire1Distance: Int = wire1Displacements
+                .subList(0, i)
+                .map(Displacement::toPoint)
+                .map(Point::distance)
+                .sum()
+            val endOfWire1: Point = wire1Displacements.subList(0, i).fold(Point(0, 0)) { x: Point, d: Displacement ->
+                d.apply(x)
+            }
+            val dx: Int = endOfWire1.distance(intersection)
+
+            val wire2Distance: Int = wire2Displacements
+                .subList(0, j)
+                .map(Displacement::toPoint)
+                .map(Point::distance)
+                .sum()
+            val endOfWire2: Point = wire2Displacements.subList(0, j).fold(Point(0, 0)) { x: Point, d: Displacement ->
+                d.apply(x)
+            }
+            val dy: Int = endOfWire2.distance(intersection)
+
+            val totalSteps: Int = wire1Distance + dx + wire2Distance + dy
+
+            if (leastNumberSteps == null || totalSteps < leastNumberSteps) {
+                leastNumberSteps = totalSteps
+                leastStepsIntersection = intersection
+            }
+        }
+    }
+
+    if (leastNumberSteps != null) {
+        println("Least steps intersection at $leastStepsIntersection in $leastNumberSteps steps")
+    } else {
+        println("No least steps intersection found")
     }
 }
