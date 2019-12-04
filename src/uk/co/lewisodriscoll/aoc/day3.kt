@@ -68,12 +68,20 @@ fun findIntersection(horizontal: Line, vertical: Line): Point? {
     return Point(vertical.first.x, horizontal.first.y)
 }
 
-fun main() {
-    val input: List<List<String>> = readFile("day3.txt").map { line: String -> line.split(",") }
+fun stepsToPoint(point: Point, displacements: List<Displacement>): Int {
+    val stepsToEndOfWire: Int = displacements
+        .map(Displacement::toPoint)
+        .map(Point::distance)
+        .sum()
+    val endOfWire: Point = displacements.fold(Point(0, 0)) { x: Point, d: Displacement ->
+        d.applyTo(x)
+    }
+    val dx: Int = endOfWire.distance(point)
 
-    val wire1Displacements: List<Displacement> = input[0].map { s: String -> toDisplacement(s) }
-    val wire2Displacements: List<Displacement> = input[1].map { s: String -> toDisplacement(s) }
+    return stepsToEndOfWire + dx
+}
 
+fun part1(wire1Displacements: List<Displacement>, wire2Displacements: List<Displacement>): Point? {
     val wire1: List<Point> = createWire(wire1Displacements)
     val wire2: List<Point> = createWire(wire2Displacements)
 
@@ -97,12 +105,12 @@ fun main() {
         }
     }
 
-    if (closestIntersection != null) {
-        println("Intersection at: $closestIntersection")
-        println("Distance: ${closestIntersection.distance()}")
-    } else {
-        println("No intersection found")
-    }
+    return closestIntersection
+}
+
+fun part2(wire1Displacements: List<Displacement>, wire2Displacements: List<Displacement>): Pair<Point, Int>? {
+    val wire1: List<Point> = createWire(wire1Displacements)
+    val wire2: List<Point> = createWire(wire2Displacements)
 
     var leastStepsIntersection: Point? = null
     var leastNumberSteps: Int? = null
@@ -119,27 +127,10 @@ fun main() {
 
             if (intersection == null || (intersection.x == 0 && intersection.y == 0)) continue
 
-            val wire1Distance: Int = wire1Displacements
-                .subList(0, i)
-                .map(Displacement::toPoint)
-                .map(Point::distance)
-                .sum()
-            val endOfWire1: Point = wire1Displacements.subList(0, i).fold(Point(0, 0)) { x: Point, d: Displacement ->
-                d.applyTo(x)
-            }
-            val dx: Int = endOfWire1.distance(intersection)
+            val wire1Distance: Int = stepsToPoint(intersection, wire1Displacements.subList(0, i))
+            val wire2Distance: Int = stepsToPoint(intersection, wire2Displacements.subList(0, j))
 
-            val wire2Distance: Int = wire2Displacements
-                .subList(0, j)
-                .map(Displacement::toPoint)
-                .map(Point::distance)
-                .sum()
-            val endOfWire2: Point = wire2Displacements.subList(0, j).fold(Point(0, 0)) { x: Point, d: Displacement ->
-                d.applyTo(x)
-            }
-            val dy: Int = endOfWire2.distance(intersection)
-
-            val totalSteps: Int = wire1Distance + dx + wire2Distance + dy
+            val totalSteps: Int = wire1Distance + wire2Distance
 
             if (leastNumberSteps == null || totalSteps < leastNumberSteps) {
                 leastNumberSteps = totalSteps
@@ -148,8 +139,33 @@ fun main() {
         }
     }
 
-    if (leastNumberSteps != null) {
-        println("Least steps intersection at $leastStepsIntersection in $leastNumberSteps steps")
+    if (leastStepsIntersection != null && leastNumberSteps != null) {
+        return Pair(leastStepsIntersection, leastNumberSteps)
+    }
+
+    return null
+}
+
+fun main() {
+    val input: List<List<String>> = readFile("day3.txt").map { line: String -> line.split(",") }
+
+    val wire1Displacements: List<Displacement> = input[0].map { s: String -> toDisplacement(s) }
+    val wire2Displacements: List<Displacement> = input[1].map { s: String -> toDisplacement(s) }
+
+    val wire1: List<Point> = createWire(wire1Displacements)
+    val wire2: List<Point> = createWire(wire2Displacements)
+
+    val closestIntersection: Point? = part1(wire1Displacements, wire2Displacements)
+    if (closestIntersection != null) {
+        println("Intersection at: $closestIntersection")
+        println("Distance: ${closestIntersection.distance()}")
+    } else {
+        println("No intersection found")
+    }
+
+    val leastStepsAnswer: Pair<Point, Int>? = part2(wire1Displacements, wire2Displacements)
+    if (leastStepsAnswer != null) {
+        println("Least steps intersection at ${leastStepsAnswer.first} in ${leastStepsAnswer.second} steps")
     } else {
         println("No least steps intersection found")
     }
