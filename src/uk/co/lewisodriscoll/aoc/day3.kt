@@ -26,7 +26,7 @@ fun Displacement.toPoint(): Point = when(this.first) {
     Direction.U -> Point(0, this.second)
     Direction.D -> Point(0, -this.second)
 }
-fun Displacement.apply(x: Point): Point = x + this.toPoint()
+fun Displacement.applyTo(x: Point): Point = x + this.toPoint()
 
 
 fun toDisplacement(input: String): Displacement {
@@ -46,7 +46,7 @@ fun toDisplacement(input: String): Displacement {
 fun createWire(displacements: List<Displacement>): List<Point> {
     val wire: MutableList<Point> = mutableListOf(Point(0, 0))
     for (i in displacements.indices) {
-        wire.add(displacements[i].apply(wire[i]))
+        wire.add(displacements[i].applyTo(wire[i]))
     }
 
     return wire.toList()
@@ -125,7 +125,7 @@ fun main() {
                 .map(Point::distance)
                 .sum()
             val endOfWire1: Point = wire1Displacements.subList(0, i).fold(Point(0, 0)) { x: Point, d: Displacement ->
-                d.apply(x)
+                d.applyTo(x)
             }
             val dx: Int = endOfWire1.distance(intersection)
 
@@ -135,7 +135,7 @@ fun main() {
                 .map(Point::distance)
                 .sum()
             val endOfWire2: Point = wire2Displacements.subList(0, j).fold(Point(0, 0)) { x: Point, d: Displacement ->
-                d.apply(x)
+                d.applyTo(x)
             }
             val dy: Int = endOfWire2.distance(intersection)
 
