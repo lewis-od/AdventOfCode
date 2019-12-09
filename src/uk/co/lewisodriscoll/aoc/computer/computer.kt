@@ -42,6 +42,7 @@ class UnaryOperation(code: Int) : Operation(code) {
     override fun parseParamModes(): List<ParamMode> = when (opCode) {
         OpCode.STORE -> listOf(ParamMode.IMMEDIATE)
         OpCode.OUTPUT -> listOf(intToParamMode(code.getDigit(2)))
+        OpCode.TERMINATE -> listOf()
         else -> throw Exception("$opCode is not a unary operation")
     }
 }
@@ -104,7 +105,8 @@ fun runProgram(program: Memory, inputs: List<Int>): Memory {
 
         curOp = createOperation(register[instructionPointer])
     }
-
+    println("TERMINATE")
+    
     return register
 }
 
