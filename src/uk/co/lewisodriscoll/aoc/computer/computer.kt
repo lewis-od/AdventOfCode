@@ -39,13 +39,17 @@ abstract class Operation(protected val code: Int) {
 }
 
 class UnaryOperation(code: Int) : Operation(code) {
-    override fun parseParamModes(): List<ParamMode> = listOf(intToParamMode(code.getDigit(2)))
+    override fun parseParamModes(): List<ParamMode> = when (opCode) {
+        OpCode.STORE -> listOf(ParamMode.IMMEDIATE)
+        OpCode.OUTPUT -> listOf(intToParamMode(code.getDigit(2)))
+        else -> throw Exception("$opCode is not a unary operation")
+    }
 }
 
 class BinaryOperation(code: Int) : Operation(code) {
-    override fun parseParamModes(): List<ParamMode> = (4 downTo 2)
-        .map { code.getDigit(it) }
-        .map { intToParamMode(it) }
+    override fun parseParamModes(): List<ParamMode> = (2..3)
+            .map { code.getDigit(it) }
+            .map { intToParamMode(it) }
 }
 
 fun createOperation(code: Int): Operation = when(code.getTens()) {
@@ -54,20 +58,15 @@ fun createOperation(code: Int): Operation = when(code.getTens()) {
     else -> throw Exception("Invalid opcode: $code")
 }
 
-fun getValue(memory: Memory, param: Int, mode: ParamMode): Int = when (mode) {
-    ParamMode.POSITION -> memory[memory[param]]
-    ParamMode.IMMEDIATE -> memory[param]
+fun getValue(memory: Memory, pointer: Int, mode: ParamMode): Int = when (mode) {
+    ParamMode.POSITION -> memory[memory[pointer]]
+    ParamMode.IMMEDIATE -> memory[pointer]
 }
 
-fun getAddress(memory: Memory, param: Int, mode: ParamMode): Int = when (mode) {
-    ParamMode.POSITION -> memory[param]
-    ParamMode.IMMEDIATE -> param
-}
-
-fun performTernaryOperation(memory: Memory, instructionPointer: Int, op: BinaryOperation) {
+fun performBinaryOperation(memory: Memory, instructionPointer: Int, op: BinaryOperation) {
     val x: Int = getValue(memory, instructionPointer + 1, op.paramModes[0])
     val y: Int = getValue(memory, instructionPointer + 2, op.paramModes[1])
-    val out: Int = getAddress(memory, instructionPointer + 3, op.paramModes[2])
+    val out: Int = memory[instructionPointer + 3]
 
     memory[out] = when (val opCode = op.opCode) {
         OpCode.PLUS -> x + y
@@ -77,11 +76,11 @@ fun performTernaryOperation(memory: Memory, instructionPointer: Int, op: BinaryO
 }
 
 fun performUnaryOperation(memory: Memory, instructionPointer: Int, op: UnaryOperation, input: Int) {
-    val arg: Int = getAddress(memory, instructionPointer + 1, op.paramModes[0])
-    when (val opCode = op.opCode) {
-        OpCode.STORE -> memory[arg] = input
-        OpCode.OUTPUT -> println("OUTPUT: $arg")
-        else -> throw Exception("$opCode is not a unary operation")
+    if (op.opCode == OpCode.STORE) {
+        memory[memory[instructionPointer + 1]] = input
+    } else {
+        val output: Int = getValue(memory, instructionPointer + 1, op.paramModes[0])
+        println("OUTPUT: $output")
     }
 }
 
@@ -93,7 +92,7 @@ fun runProgram(program: Memory, inputs: List<Int>): Memory {
     var curOp: Operation = createOperation(register[instructionPointer])
     while (curOp.opCode != OpCode.TERMINATE) {
         if (curOp is BinaryOperation) {
-            performTernaryOperation(register, instructionPointer, curOp as BinaryOperation)
+            performBinaryOperation(register, instructionPointer, curOp as BinaryOperation)
             instructionPointer += 4
         } else {
             performUnaryOperation(register, instructionPointer, curOp as UnaryOperation, inputs[inputCounter])
