@@ -7,34 +7,32 @@ fun Int.digits(): List<Int> = this.toString().toList().map(Char::toString).map(S
 
 fun digitsToNumber(digits: List<Int>): Int = digits.reduceRightIndexed { n, x, acc -> acc + 10.pow(digits.size - 1 - n) * x }
 
-fun contains2ConsecutiveDigits(digits: List<Int>): Boolean {
-    var containsConsecutive: Boolean = false
-    for (i in 1 until digits.size) {
-        if (digits[i] == digits[i - 1]) {
-            containsConsecutive = true
+fun countDigits(digits: List<Int>): HashMap<Int, Int> {
+    val frequencies: HashMap<Int, Int> = hashMapOf()
+    for (digit: Int in digits) {
+        if (frequencies[digit] != null) {
+            frequencies[digit] = frequencies[digit]!! + 1
+        } else {
+            frequencies[digit] = 1
         }
     }
-    return containsConsecutive
+
+    return frequencies
 }
 
-fun contains3ConsecuiveDigits(digits: List<Int>): Boolean {
-//    var containsConsecutive: Boolean = false
-//    for (i in 2 until digits.size) {
-//        if ((digits[i] == digits[i - 1]) && (digits[i - 1] == digits[i - 2])) {
-//            containsConsecutive = true
-//        }
-//    }
-//    return containsConsecutive
-    var containsConsecutive: Boolean = false
-    for (i in 0 until digits.size - 4) {
-        if (digits[i] == digits[i + 1]) {
-            if (digits[i] != digits[i + 2]) continue
-            if (digits[i] != digits[i + 3]) {
-                containsConsecutive = true
-            }
-        }
+fun contains2ConsecutiveDigits(digits: List<Int>): Boolean = countDigits(digits)
+    .values
+    .fold(false) { acc: Boolean, freq: Int ->
+        acc || (freq >= 2)
     }
-    return containsConsecutive
+
+fun containsPairOfDigits(digits: List<Int>): Boolean {
+    val frequencies: HashMap<Int, Int> = countDigits(digits)
+
+    return frequencies.values
+        .fold(false) { acc: Boolean, freq: Int ->
+            acc || (freq == 2)
+        }
 }
 
 fun part1(searchSpace: List<Int>): List<Int> = searchSpace
@@ -43,11 +41,9 @@ fun part1(searchSpace: List<Int>): List<Int> = searchSpace
     .filter { digits: List<Int> -> contains2ConsecutiveDigits(digits) }
     .map { digits: List<Int> -> digitsToNumber(digits) }
 
-// Doesn't work - will filter out 111122 even though it's valid
-// Answer is between 758 and 1262
 fun part2(searchSpace: List<Int>): List<Int> = searchSpace
     .map(Int::digits)
-    .filter { digits: List<Int> -> !contains3ConsecuiveDigits(digits) }
+    .filter { digits: List<Int> -> containsPairOfDigits(digits) }
     .map { digits: List<Int> -> digitsToNumber(digits) }
 
 fun main() {
