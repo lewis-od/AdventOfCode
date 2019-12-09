@@ -8,5 +8,9 @@ fun main() {
         .map(String::toInt)
         .toMutableList()
 
+    println("Part 1:")
     runProgram(program, listOf(1, 0))
+    println()
+    println("Part 2:")
+    runProgram(program, listOf(5, 0))
 }
