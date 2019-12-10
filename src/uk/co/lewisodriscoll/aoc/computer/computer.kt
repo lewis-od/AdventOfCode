@@ -60,7 +60,7 @@ class UnaryOperation(code: Int) : Operation(code) {
     }
 }
 
-class BinaryOperation(code: Int) : Operation(code) {
+class JumpOperation(code: Int) : Operation(code) {
     override fun parseParamModes(): List<ParamMode> = (2..4)
         .map { intToParamMode(code.getDigit(it)) }
 }
@@ -73,7 +73,7 @@ class TernaryOperation(code: Int) : Operation(code) {
 
 fun createOperation(code: Int): Operation = when(code.getTens()) {
     1, 2, 7, 8 -> TernaryOperation(code)
-    5, 6 -> BinaryOperation(code)
+    5, 6 -> JumpOperation(code)
     3, 4, 99 -> UnaryOperation(code)
     else -> throw Exception("Op code not implemented: ${code.getTens()}")
 }
@@ -97,7 +97,7 @@ fun performTernaryOperation(memory: Memory, instructionPointer: Int, op: Ternary
     }
 }
 
-fun performBinaryOperation(memory: Memory, instructionPointer: Int, op: BinaryOperation): Int {
+fun performJumpOperation(memory: Memory, instructionPointer: Int, op: JumpOperation): Int {
     val arg: Int = getValue(memory, instructionPointer + 1, op.paramModes[0])
     val target: Int = getValue(memory, instructionPointer + 2, op.paramModes[1])
 
@@ -128,17 +128,21 @@ fun runProgram(program: Memory, inputs: List<Int>): Memory {
     var inputCounter: Int = 0
     var curOp: Operation = createOperation(register[instructionPointer])
     while (curOp.opCode != OpCode.TERMINATE) {
-        if (curOp is TernaryOperation) {
-            performTernaryOperation(register, instructionPointer, curOp as TernaryOperation)
-            instructionPointer += 4
-        } else if (curOp is BinaryOperation) {
-            instructionPointer = performBinaryOperation(register, instructionPointer, curOp as BinaryOperation)
-        } else {
-            performUnaryOperation(register, instructionPointer, curOp as UnaryOperation, inputs[inputCounter])
-            if (curOp.opCode == OpCode.INPUT) {
-                inputCounter += 1
+        instructionPointer = when (curOp) {
+            is TernaryOperation -> {
+                performTernaryOperation(register, instructionPointer, curOp as TernaryOperation)
+                instructionPointer + 4
             }
-            instructionPointer += 2
+
+            is JumpOperation -> performJumpOperation(register, instructionPointer, curOp as JumpOperation)
+
+            else -> {
+                performUnaryOperation(register, instructionPointer, curOp as UnaryOperation, inputs[inputCounter])
+                if (curOp.opCode == OpCode.INPUT) {
+                    inputCounter += 1
+                }
+                instructionPointer + 2
+            }
         }
 
         curOp = createOperation(register[instructionPointer])
