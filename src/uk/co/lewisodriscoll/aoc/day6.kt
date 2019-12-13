@@ -1,9 +1,11 @@
 package uk.co.lewisodriscoll.aoc
 
-class Satellite(val label: String, var orbits: Satellite?) {
-    override fun toString(): String {
-        if (orbits != null) return "$label->${orbits!!.label}"
-        return "$label"
+class Satellite(val label: String, var parent: Satellite?) {
+    val children: MutableList<Satellite> = mutableListOf()
+
+    override fun toString(): String = when (parent) {
+        null -> label
+        else -> "$label->${parent!!.label}"
     }
 }
 
@@ -30,7 +32,7 @@ class Map {
                 map.add(new)
             }
             else -> {
-                existing.orbits = root
+                existing.parent = root
             }
         }
 
