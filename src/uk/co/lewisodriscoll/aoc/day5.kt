@@ -4,9 +4,7 @@ import uk.co.lewisodriscoll.aoc.computer.Memory
 import uk.co.lewisodriscoll.aoc.computer.runProgram
 
 fun main() {
-    val program: Memory = readFile("day5.txt")[0].split(",")
-        .map(String::toInt)
-        .toMutableList()
+    val program: Memory = readProgramFromFile("day5.txt")
 
     println("Part 1:")
     runProgram(program, listOf(1))

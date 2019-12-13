@@ -4,9 +4,7 @@ import uk.co.lewisodriscoll.aoc.computer.Memory
 import uk.co.lewisodriscoll.aoc.computer.runProgram
 
 fun main() {
-    val program: Memory = readFile("day2.txt")[0].split(",")
-            .map(String::toInt)
-            .toMutableList()
+    val program: Memory = readProgramFromFile("day2.txt")
     program[1] = 12
     program[2] = 2
 
@@ -18,7 +16,7 @@ fun main() {
             program[1] = noun
             program[2] = verb
 
-            val output = runProgram(program)[0]
+            val output = runProgram(program, printTerminate = false)[0]
             if (output == 19690720) {
                 val answer: Int = 100 * noun + verb
                 println("Answer (part 2): $answer")

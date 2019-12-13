@@ -124,7 +124,7 @@ fun performUnaryOperation(memory: Memory, instructionPointer: Int, op: UnaryOper
     }
 }
 
-fun runProgram(program: Memory, inputsArgs: List<Int>): Memory {
+fun runProgram(program: Memory, inputsArgs: List<Int>, printTerminate: Boolean = true): Memory {
     val register: Memory = program.toMutableList()
 
     var instructionPointer: Int = 0;
@@ -147,9 +147,10 @@ fun runProgram(program: Memory, inputsArgs: List<Int>): Memory {
 
         curOp = createOperation(register[instructionPointer])
     }
-    println("TERMINATE")
+
+    if (printTerminate) println("TERMINATE")
 
     return register
 }
 
-fun runProgram(program: Memory): Memory = runProgram(program, listOf())
+fun runProgram(program: Memory, printTerminate: Boolean = false): Memory = runProgram(program, listOf(), printTerminate)
