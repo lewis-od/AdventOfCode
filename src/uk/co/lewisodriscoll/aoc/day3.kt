@@ -1,5 +1,6 @@
 package uk.co.lewisodriscoll.aoc
 
+import uk.co.lewisodriscoll.aoc.util.readFile
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min

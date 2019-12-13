@@ -1,5 +1,7 @@
 package uk.co.lewisodriscoll.aoc
 
+import uk.co.lewisodriscoll.aoc.util.readFile
+
 class Satellite(val label: String, var parent: Satellite?) {
 
     fun countOrbits(): Int {

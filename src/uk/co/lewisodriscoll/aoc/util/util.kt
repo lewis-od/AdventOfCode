@@ -1,4 +1,4 @@
-package uk.co.lewisodriscoll.aoc
+package uk.co.lewisodriscoll.aoc.util
 
 import uk.co.lewisodriscoll.aoc.computer.Memory
 import java.io.File

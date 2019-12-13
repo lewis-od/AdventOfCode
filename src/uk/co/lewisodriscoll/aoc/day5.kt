@@ -2,6 +2,7 @@ package uk.co.lewisodriscoll.aoc
 
 import uk.co.lewisodriscoll.aoc.computer.Memory
 import uk.co.lewisodriscoll.aoc.computer.runProgram
+import uk.co.lewisodriscoll.aoc.util.readProgramFromFile
 
 fun main() {
     val program: Memory = readProgramFromFile("day5.txt")
