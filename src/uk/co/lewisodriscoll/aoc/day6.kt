@@ -7,12 +7,18 @@ class Satellite(val label: String, var parent: Satellite?) {
         null -> label
         else -> "$label->${parent!!.label}"
     }
+
+    fun countOrbits(): Int {
+        if (this.parent == null) return 0
+
+        return 1 + this.parent!!.countOrbits()
+    }
 }
 
 class Map {
-    private val map: MutableList<Satellite> = mutableListOf()
+    val satellites: MutableList<Satellite> = mutableListOf()
 
-    private fun getByLabel(label: String): Satellite? = map.find { it.label == label }
+    private fun getByLabel(label: String): Satellite? = satellites.find { it.label == label }
 
     fun add(orbit: String) {
         val labels: List<String> = orbit.split(")")
@@ -20,7 +26,7 @@ class Map {
         val root: Satellite = when (val existing = getByLabel(labels[0])) {
             null -> {
                 val new: Satellite = Satellite(labels[0], null)
-                map.add(new)
+                satellites.add(new)
                 new
             }
             else -> existing
@@ -29,7 +35,7 @@ class Map {
         when (val existing = getByLabel(labels[1])) {
             null -> {
                 val new: Satellite = Satellite(labels[1], root)
-                map.add(new)
+                satellites.add(new)
             }
             else -> {
                 existing.parent = root
@@ -39,24 +45,15 @@ class Map {
     }
 
     override fun toString(): String {
-        return map.joinToString("\n", transform = Satellite::toString)
+        return satellites.joinToString("\n", transform = Satellite::toString)
     }
 }
 
 fun main() {
     val map = Map()
 
-    val input = ("COM)B\n" +
-            "B)C\n" +
-            "C)D\n" +
-            "D)E\n" +
-            "E)F\n" +
-            "B)G\n" +
-            "G)H\n" +
-            "D)I\n" +
-            "E)J\n" +
-            "J)K\n" +
-            "K)L").split("\n").forEach { map.add(it) }
+    val input = readFile("day6.txt").forEach { map.add(it) }
 
-    println(map)
+    val numOrbits: Int = map.satellites.map(Satellite::countOrbits).sum()
+    println("Num orbits: $numOrbits")
 }
