@@ -1,6 +1,9 @@
 package uk.co.lewisodriscoll.aoc.computer
 
 typealias Memory = MutableList<Int>
+typealias ProgramOutput = Pair<Memory, List<Int>>
+fun ProgramOutput.getMemory() = this.first
+fun ProgramOutput.getOutputs() = this.second
 
 fun Int.digits(): List<Int> = this.toString().toList().map(Char::toString).map(String::toInt)
 fun Int.getDigit(i: Int): Int = this.digits()
@@ -110,7 +113,7 @@ fun performJumpOperation(memory: Memory, instructionPointer: Int, op: JumpOperat
     return if (condition) target else instructionPointer + 3
 }
 
-fun performUnaryOperation(memory: Memory, instructionPointer: Int, op: UnaryOperation, inputs: MutableList<Int>) {
+fun performUnaryOperation(memory: Memory, instructionPointer: Int, op: UnaryOperation, inputs: MutableList<Int>, outputs: MutableList<Int>) {
     when (op.opCode) {
         OpCode.INPUT -> {
             val input: Int = inputs.removeAt(0)
@@ -118,17 +121,19 @@ fun performUnaryOperation(memory: Memory, instructionPointer: Int, op: UnaryOper
         }
         OpCode.OUTPUT -> {
             val output: Int = getValue(memory, instructionPointer + 1, op.paramModes[0])
+            outputs.add(output)
             println("OUTPUT: $output")
         }
         else -> throw Exception("${op.opCode} not implemented")
     }
 }
 
-fun runProgram(program: Memory, inputsArgs: List<Int>, printTerminate: Boolean = true): Memory {
+fun runProgram(program: Memory, inputsArgs: List<Int>, printTerminate: Boolean = true): ProgramOutput {
     val register: Memory = program.toMutableList()
 
     var instructionPointer: Int = 0;
     val inputs: MutableList<Int> = inputsArgs.toMutableList()
+    val outputs: MutableList<Int> = mutableListOf()
     var curOp: Operation = createOperation(register[instructionPointer])
     while (curOp.opCode != OpCode.TERMINATE) {
         instructionPointer = when (curOp) {
@@ -140,7 +145,7 @@ fun runProgram(program: Memory, inputsArgs: List<Int>, printTerminate: Boolean =
             is JumpOperation -> performJumpOperation(register, instructionPointer, curOp as JumpOperation)
 
             else -> {
-                performUnaryOperation(register, instructionPointer, curOp as UnaryOperation, inputs)
+                performUnaryOperation(register, instructionPointer, curOp as UnaryOperation, inputs, outputs)
                 instructionPointer + 2
             }
         }
@@ -150,7 +155,7 @@ fun runProgram(program: Memory, inputsArgs: List<Int>, printTerminate: Boolean =
 
     if (printTerminate) println("TERMINATE")
 
-    return register
+    return ProgramOutput(register, outputs)
 }
 
-fun runProgram(program: Memory, printTerminate: Boolean = false): Memory = runProgram(program, listOf(), printTerminate)
+fun runProgram(program: Memory, printTerminate: Boolean = false): ProgramOutput = runProgram(program, listOf(), printTerminate)
