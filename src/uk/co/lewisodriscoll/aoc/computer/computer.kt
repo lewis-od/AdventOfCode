@@ -81,81 +81,92 @@ fun createOperation(code: Int): Operation = when(code.getTens()) {
     else -> throw Exception("Op code not implemented: ${code.getTens()}")
 }
 
-fun getValue(memory: Memory, pointer: Int, mode: ParamMode): Int = when (mode) {
-    ParamMode.POSITION -> memory[memory[pointer]]
-    ParamMode.IMMEDIATE -> memory[pointer]
-}
+class Computer(private val program: Memory, private val printOutput: Boolean = false) {
+    private lateinit var memory: Memory
+    private lateinit var outputs: MutableList<Int>
+    private var instructionPointer: Int = 0;
 
-fun performTernaryOperation(memory: Memory, instructionPointer: Int, op: TernaryOperation) {
-    val x: Int = getValue(memory, instructionPointer + 1, op.paramModes[0])
-    val y: Int = getValue(memory, instructionPointer + 2, op.paramModes[1])
-    val out: Int = memory[instructionPointer + 3]
-
-    memory[out] = when (val opCode = op.opCode) {
-        OpCode.PLUS -> x + y
-        OpCode.TIMES -> x * y
-        OpCode.LESS_THAN -> (x < y).toInt()
-        OpCode.EQUALS -> (x == y).toInt()
-        else -> throw Exception("$opCode is not a binary operation")
-    }
-}
-
-fun performJumpOperation(memory: Memory, instructionPointer: Int, op: JumpOperation): Int {
-    val arg: Int = getValue(memory, instructionPointer + 1, op.paramModes[0])
-    val target: Int = getValue(memory, instructionPointer + 2, op.paramModes[1])
-
-    val condition: Boolean = when (val opCode = op.opCode) {
-        OpCode.JUMP_TRUE -> arg > 0
-        OpCode.JUMP_FALSE -> arg == 0
-        else -> throw Exception("$opCode is not a binary operation")
+    private fun resetMemory() {
+        memory = mutableListOf<Int>().apply { addAll(program) }
+        outputs = mutableListOf()
+        instructionPointer = 0
     }
 
-    return if (condition) target else instructionPointer + 3
-}
+    private fun getValue(pointer: Int, mode: ParamMode): Int = when (mode) {
+        ParamMode.POSITION -> memory[memory[pointer]]
+        ParamMode.IMMEDIATE -> memory[pointer]
+    }
 
-fun performUnaryOperation(memory: Memory, instructionPointer: Int, op: UnaryOperation, inputs: MutableList<Int>, outputs: MutableList<Int>) {
-    when (op.opCode) {
-        OpCode.INPUT -> {
-            val input: Int = inputs.removeAt(0)
-            memory[memory[instructionPointer + 1]] = input
+    private fun performTernaryOperation(op: TernaryOperation) {
+        val x: Int = getValue(instructionPointer + 1, op.paramModes[0])
+        val y: Int = getValue(instructionPointer + 2, op.paramModes[1])
+        val out: Int = memory[instructionPointer + 3]
+
+        memory[out] = when (val opCode = op.opCode) {
+            OpCode.PLUS -> x + y
+            OpCode.TIMES -> x * y
+            OpCode.LESS_THAN -> (x < y).toInt()
+            OpCode.EQUALS -> (x == y).toInt()
+            else -> throw Exception("$opCode is not a binary operation")
         }
-        OpCode.OUTPUT -> {
-            val output: Int = getValue(memory, instructionPointer + 1, op.paramModes[0])
-            outputs.add(output)
-            println("OUTPUT: $output")
-        }
-        else -> throw Exception("${op.opCode} not implemented")
     }
-}
 
-fun runProgram(program: Memory, inputsArgs: List<Int>, printTerminate: Boolean = true): ProgramOutput {
-    val register: Memory = program.toMutableList()
+    private fun performJumpOperation(op: JumpOperation): Int {
+        val arg: Int = getValue(instructionPointer + 1, op.paramModes[0])
+        val target: Int = getValue(instructionPointer + 2, op.paramModes[1])
 
-    var instructionPointer: Int = 0;
-    val inputs: MutableList<Int> = inputsArgs.toMutableList()
-    val outputs: MutableList<Int> = mutableListOf()
-    var curOp: Operation = createOperation(register[instructionPointer])
-    while (curOp.opCode != OpCode.TERMINATE) {
-        instructionPointer = when (curOp) {
-            is TernaryOperation -> {
-                performTernaryOperation(register, instructionPointer, curOp as TernaryOperation)
-                instructionPointer + 4
+        val condition: Boolean = when (val opCode = op.opCode) {
+            OpCode.JUMP_TRUE -> arg > 0
+            OpCode.JUMP_FALSE -> arg == 0
+            else -> throw Exception("$opCode is not a binary operation")
+        }
+
+        return if (condition) target else instructionPointer + 3
+    }
+
+    private fun performUnaryOperation(op: UnaryOperation, inputs: MutableList<Int>) {
+        when (op.opCode) {
+            OpCode.INPUT -> {
+                val input: Int = inputs.removeAt(0)
+                memory[memory[instructionPointer + 1]] = input
+            }
+            OpCode.OUTPUT -> {
+                val output: Int = getValue(instructionPointer + 1, op.paramModes[0])
+                outputs.add(output)
+                if (printOutput) println("OUTPUT: $output")
+            }
+            else -> throw Exception("${op.opCode} not implemented")
+        }
+    }
+
+    fun runProgram(inputsArgs: List<Int>): ProgramOutput {
+        resetMemory()
+        val inputs: MutableList<Int> = inputsArgs.toMutableList()
+
+        var curOp: Operation = createOperation(memory[instructionPointer])
+        while (curOp.opCode != OpCode.TERMINATE) {
+            instructionPointer = when (curOp) {
+                is TernaryOperation -> {
+                    performTernaryOperation(curOp as TernaryOperation)
+                    instructionPointer + 4
+                }
+
+                is JumpOperation -> performJumpOperation(curOp as JumpOperation)
+
+                else -> {
+                    performUnaryOperation(curOp as UnaryOperation, inputs)
+                    instructionPointer + 2
+                }
             }
 
-            is JumpOperation -> performJumpOperation(register, instructionPointer, curOp as JumpOperation)
-
-            else -> {
-                performUnaryOperation(register, instructionPointer, curOp as UnaryOperation, inputs, outputs)
-                instructionPointer + 2
-            }
+            curOp = createOperation(memory[instructionPointer])
         }
 
-        curOp = createOperation(register[instructionPointer])
+        if (printOutput) println("TERMINATE")
+
+        return ProgramOutput(memory, outputs)
     }
 
-    if (printTerminate) println("TERMINATE")
+    fun runProgram(): ProgramOutput = runProgram(listOf())
 
-    return ProgramOutput(register, outputs)
 }
-
-fun runProgram(program: Memory, printTerminate: Boolean = false): ProgramOutput = runProgram(program, listOf(), printTerminate)

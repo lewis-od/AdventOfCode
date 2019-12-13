@@ -1,8 +1,8 @@
 package uk.co.lewisodriscoll.aoc
 
+import uk.co.lewisodriscoll.aoc.computer.Computer
 import uk.co.lewisodriscoll.aoc.computer.Memory
 import uk.co.lewisodriscoll.aoc.computer.getMemory
-import uk.co.lewisodriscoll.aoc.computer.runProgram
 import uk.co.lewisodriscoll.aoc.util.readProgramFromFile
 
 fun main() {
@@ -10,7 +10,7 @@ fun main() {
     program[1] = 12
     program[2] = 2
 
-    val result: Memory = runProgram(program).getMemory()
+    val result: Memory = Computer(program).runProgram().getMemory()
     println("Answer (part 1): ${result[0]}")
 
     for (noun in 1..99) {
@@ -18,7 +18,7 @@ fun main() {
             program[1] = noun
             program[2] = verb
 
-            val output = runProgram(program, printTerminate = false).getMemory()[0]
+            val output = Computer(program).runProgram().getMemory()[0]
             if (output == 19690720) {
                 val answer: Int = 100 * noun + verb
                 println("Answer (part 2): $answer")
