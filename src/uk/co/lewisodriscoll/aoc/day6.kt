@@ -16,42 +16,49 @@ class Satellite(val label: String, var parent: Satellite?) {
 
 }
 
-class Map {
-    private val satellites: MutableList<Satellite> = mutableListOf()
+class Map(orbits: List<String>) {
+    private val satellites: Array<Satellite>
 
-    private fun findByLabel(label: String): Satellite? = satellites.find { it.label == label }
+    init {
+        satellites = orbits.foldRight(arrayOf()) { orbit, map -> addOrbit(orbit, map) }
+    }
 
-    fun getByLabel(label: String) = findByLabel(label)!!
+    private fun getByLabel(label: String) = findByLabel(label, satellites)!!
 
-    fun add(orbit: String) {
+    private fun findByLabel(label: String, map: Array<Satellite>): Satellite? = map.find { it.label == label }
+
+    private fun addOrbit(orbit: String, partialMap: Array<Satellite>): Array<Satellite> {
+        var newMap: Array<Satellite> = partialMap.clone()
+
         val labels: List<String> = orbit.split(")")
 
-        val root: Satellite = when (val existing = findByLabel(labels[0])) {
+        val root: Satellite = when (val existing = findByLabel(labels[0], partialMap)) {
             null -> {
-                val new: Satellite = Satellite(labels[0], null)
-                satellites.add(new)
-                new
+                val newSatellite: Satellite = Satellite(labels[0], null)
+                newMap = arrayOf(newSatellite, *partialMap)
+                newSatellite
             }
             else -> existing
         }
 
-        when (val existing = findByLabel(labels[1])) {
+        when (val existing = findByLabel(labels[1], partialMap)) {
             null -> {
                 val new: Satellite = Satellite(labels[1], root)
-                satellites.add(new)
+                newMap = arrayOf(new, *newMap)
             }
             else -> {
                 existing.parent = root
             }
         }
 
+        return newMap
     }
 
     fun countIndirectOrbits(): Int = satellites.map(Satellite::countOrbits).sum()
 
-    fun jumpsBetween(a: Satellite, b: Satellite): Int {
-        val aParents = a.indirectlyOrbits()
-        val bParents = b.indirectlyOrbits()
+    fun minJumpsBetween(a: String, b: String): Int {
+        val aParents = getByLabel(a).indirectlyOrbits()
+        val bParents = getByLabel(b).indirectlyOrbits()
 
         val commonAncestor: Satellite = aParents.first { bParents.contains(it) }
         val jumpsToA = aParents.indexOf(commonAncestor)
@@ -63,15 +70,13 @@ class Map {
 }
 
 fun main() {
-    val map = Map()
-    val input: List<String> = readFile("day6.txt")
 
-    input.forEach { map.add(it) }
+    val input: List<String> = readFile("day6.txt")
+    val map = Map(input)
+
     val numOrbits: Int = map.countIndirectOrbits()
     println("Num indirect orbits: $numOrbits")
 
-    val me: Satellite = map.getByLabel("YOU")
-    val santa: Satellite = map.getByLabel("SAN")
-    val numTransfers: Int = map.jumpsBetween(me, santa)
+    val numTransfers: Int = map.minJumpsBetween("YOU", "SAN")
     println("Min num orbital transfers: $numTransfers")
 }
