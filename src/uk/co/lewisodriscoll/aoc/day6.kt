@@ -16,7 +16,7 @@ class Satellite(val label: String, var parent: Satellite?) {
 }
 
 class Map {
-    val satellites: MutableList<Satellite> = mutableListOf()
+    private val satellites: MutableList<Satellite> = mutableListOf()
 
     private fun getByLabel(label: String): Satellite? = satellites.find { it.label == label }
 
@@ -44,6 +44,8 @@ class Map {
 
     }
 
+    fun countIndirectOrbits(): Int = satellites.map(Satellite::countOrbits).sum()
+
     override fun toString(): String {
         return satellites.joinToString("\n", transform = Satellite::toString)
     }
@@ -51,9 +53,7 @@ class Map {
 
 fun main() {
     val map = Map()
-
     val input = readFile("day6.txt").forEach { map.add(it) }
-
-    val numOrbits: Int = map.satellites.map(Satellite::countOrbits).sum()
-    println("Num orbits: $numOrbits")
+    val numOrbits: Int = map.countIndirectOrbits()
+    println("Num indirect orbits: $numOrbits")
 }
