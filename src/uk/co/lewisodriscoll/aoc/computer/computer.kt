@@ -110,9 +110,12 @@ fun performJumpOperation(memory: Memory, instructionPointer: Int, op: JumpOperat
     return if (condition) target else instructionPointer + 3
 }
 
-fun performUnaryOperation(memory: Memory, instructionPointer: Int, op: UnaryOperation, input: Int) {
+fun performUnaryOperation(memory: Memory, instructionPointer: Int, op: UnaryOperation, inputs: MutableList<Int>) {
     when (op.opCode) {
-        OpCode.INPUT -> memory[memory[instructionPointer + 1]] = input
+        OpCode.INPUT -> {
+            val input: Int = inputs.removeAt(0)
+            memory[memory[instructionPointer + 1]] = input
+        }
         OpCode.OUTPUT -> {
             val output: Int = getValue(memory, instructionPointer + 1, op.paramModes[0])
             println("OUTPUT: $output")
@@ -121,11 +124,11 @@ fun performUnaryOperation(memory: Memory, instructionPointer: Int, op: UnaryOper
     }
 }
 
-fun runProgram(program: Memory, inputs: List<Int>): Memory {
+fun runProgram(program: Memory, inputsArgs: List<Int>): Memory {
     val register: Memory = program.toMutableList()
 
     var instructionPointer: Int = 0;
-    var inputCounter: Int = 0
+    val inputs: MutableList<Int> = inputsArgs.toMutableList()
     var curOp: Operation = createOperation(register[instructionPointer])
     while (curOp.opCode != OpCode.TERMINATE) {
         instructionPointer = when (curOp) {
@@ -137,10 +140,7 @@ fun runProgram(program: Memory, inputs: List<Int>): Memory {
             is JumpOperation -> performJumpOperation(register, instructionPointer, curOp as JumpOperation)
 
             else -> {
-                performUnaryOperation(register, instructionPointer, curOp as UnaryOperation, inputs[inputCounter])
-                if (curOp.opCode == OpCode.INPUT) {
-                    inputCounter += 1
-                }
+                performUnaryOperation(register, instructionPointer, curOp as UnaryOperation, inputs)
                 instructionPointer + 2
             }
         }

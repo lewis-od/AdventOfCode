@@ -9,8 +9,8 @@ fun main() {
         .toMutableList()
 
     println("Part 1:")
-    runProgram(program, listOf(1, 0))
+    runProgram(program, listOf(1))
     println()
     println("Part 2:")
-    runProgram(program, listOf(5, 0))
+    runProgram(program, listOf(5))
 }
