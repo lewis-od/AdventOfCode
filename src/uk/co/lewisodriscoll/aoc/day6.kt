@@ -1,29 +1,32 @@
 package uk.co.lewisodriscoll.aoc
 
 class Satellite(val label: String, var parent: Satellite?) {
-    val children: MutableList<Satellite> = mutableListOf()
-
-    override fun toString(): String = when (parent) {
-        null -> label
-        else -> "$label->${parent!!.label}"
-    }
 
     fun countOrbits(): Int {
         if (this.parent == null) return 0
 
         return 1 + this.parent!!.countOrbits()
     }
+
+    fun indirectlyOrbits(): Array<Satellite> {
+        if (parent == null) return arrayOf()
+        val parentsOrbits = parent!!.indirectlyOrbits()
+        return arrayOf(parent!!, *parentsOrbits)
+    }
+
 }
 
 class Map {
     private val satellites: MutableList<Satellite> = mutableListOf()
 
-    private fun getByLabel(label: String): Satellite? = satellites.find { it.label == label }
+    private fun findByLabel(label: String): Satellite? = satellites.find { it.label == label }
+
+    fun getByLabel(label: String) = findByLabel(label)!!
 
     fun add(orbit: String) {
         val labels: List<String> = orbit.split(")")
 
-        val root: Satellite = when (val existing = getByLabel(labels[0])) {
+        val root: Satellite = when (val existing = findByLabel(labels[0])) {
             null -> {
                 val new: Satellite = Satellite(labels[0], null)
                 satellites.add(new)
@@ -32,7 +35,7 @@ class Map {
             else -> existing
         }
 
-        when (val existing = getByLabel(labels[1])) {
+        when (val existing = findByLabel(labels[1])) {
             null -> {
                 val new: Satellite = Satellite(labels[1], root)
                 satellites.add(new)
@@ -46,14 +49,29 @@ class Map {
 
     fun countIndirectOrbits(): Int = satellites.map(Satellite::countOrbits).sum()
 
-    override fun toString(): String {
-        return satellites.joinToString("\n", transform = Satellite::toString)
+    fun jumpsBetween(a: Satellite, b: Satellite): Int {
+        val aParents = a.indirectlyOrbits()
+        val bParents = b.indirectlyOrbits()
+
+        val commonAncestor: Satellite = aParents.first { bParents.contains(it) }
+        val jumpsToA = aParents.indexOf(commonAncestor)
+        val jumpsToB = bParents.indexOf(commonAncestor)
+
+        return jumpsToA + jumpsToB
     }
+
 }
 
 fun main() {
     val map = Map()
-    val input = readFile("day6.txt").forEach { map.add(it) }
+    val input: List<String> = readFile("day6.txt")
+
+    input.forEach { map.add(it) }
     val numOrbits: Int = map.countIndirectOrbits()
     println("Num indirect orbits: $numOrbits")
+
+    val me: Satellite = map.getByLabel("YOU")
+    val santa: Satellite = map.getByLabel("SAN")
+    val numTransfers: Int = map.jumpsBetween(me, santa)
+    println("Min num orbital transfers: $numTransfers")
 }
