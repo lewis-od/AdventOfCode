@@ -1,5 +1,6 @@
 package uk.co.lewisodriscoll.aoc
 
+import uk.co.lewisodriscoll.aoc.util.readFile
 import kotlin.math.abs
 
 class Moon(val x: Int, val y: Int, val z: Int, val vx: Int, val vy: Int, val vz: Int) {
@@ -58,12 +59,13 @@ fun part1(moons: List<Moon>): Int = generateSequence(moons) { step(it) }
     .map{ it.map(Moon::getTotalEnergy).sum() }
     .last()
 
+fun moonFromString(str: String): Moon {
+    val matches = Regex("\\<x=(-?\\d+),\\sy=(-?\\d+),\\sz=(-?\\d+)\\>").matchEntire(str)
+    return Moon(matches!!.groupValues[1].toInt(), matches.groupValues[2].toInt(), matches.groupValues[3].toInt())
+}
+
 fun main() {
-    val io = Moon(13, -13, -2)
-    val europa = Moon(16, 2, -15)
-    val ganymede = Moon(7, -18, -12)
-    val callisto = Moon(-3, -8, -8)
-    val moons = listOf(io, europa, ganymede, callisto)
+    val moons = readFile("day12.txt").map { moonFromString(it) }
 
     val totalEnergy = part1(moons)
     println("Total energy after 1000 steps: $totalEnergy")
