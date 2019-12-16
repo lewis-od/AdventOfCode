@@ -2,7 +2,6 @@ package uk.co.lewisodriscoll.aoc
 
 import uk.co.lewisodriscoll.aoc.computer.Computer
 import uk.co.lewisodriscoll.aoc.computer.Memory
-import uk.co.lewisodriscoll.aoc.computer.getOutputs
 import uk.co.lewisodriscoll.aoc.util.readProgramFromFile
 
 fun <T> List<T>.plusAt(index: Int, element: T): List<T> = when {
@@ -31,15 +30,36 @@ fun runChain(phases: List<Int>, computer: Computer) = phases.reversed().foldRigh
     runAmplifier(phase, input, computer)
 }
 
-fun part1(computer: Computer): Int  = (0..4).toList()
+fun runLoop(phases: List<Int>, computers: List<Computer>): Int {
+    computers.forEachIndexed { i, computer -> computer.input(phases[i]) }
+
+    var output = 0
+    while (!computers.last().hasTerminated()) {
+        computers.forEach { computer ->
+            computer.input(output)
+            output = computer.runUntilHalt().last()
+        }
+    }
+
+    return output
+}
+
+fun part1(program: Memory): Int  = (0..4).toList()
     .permutations()
-    .map { runChain(it, computer) }
+    .map { runChain(it, Computer(program)) }
+    .max()!!
+
+fun part2(program: Memory) = (5..9).toList()
+    .permutations()
+    .map { runLoop(it, (5..9).map { Computer(program) }) }
     .max()!!
 
 fun main() {
     val program: Memory = readProgramFromFile("day7.txt")
-    val computer: Computer = Computer(program, printOutput = false)
 
-    val output1: Int = part1(computer)
+    val output1: Int = part1(program)
     println("Output signal (part 1): $output1")
+
+    val output2 = part2(program)
+    println("Output signal (part 2): $output2")
 }

@@ -89,9 +89,11 @@ class Computer(private var program: Memory, private val printOutput: Boolean = f
     private fun shouldHalt(): Boolean =
         (curOp.opCode == OpCode.TERMINATE) || (curOp.opCode == OpCode.INPUT && inputs.size == 0)
 
+    fun hasTerminated(): Boolean = curOp.opCode == OpCode.TERMINATE
+
     fun input(x: Int) = inputs.add(x)
 
-    fun runUntilHalt() {
+    fun runUntilHalt(): Memory {
         if (!initialised) resetMemory()
 
         while (!shouldHalt()) {
@@ -105,6 +107,8 @@ class Computer(private var program: Memory, private val printOutput: Boolean = f
                 OpCode.TERMINATE -> println("TERMINATE")
             }
         }
+
+        return outputs
     }
 
     fun runProgram(inputsArgs: List<Int>, forceReset: Boolean = true): List<Int> {
