@@ -10,7 +10,10 @@ fun main() {
     program[1] = 12
     program[2] = 2
 
-    val result: Memory = Computer(program).runProgram().getMemory()
+    val computer: Computer = Computer(program)
+    computer.runProgram()
+
+    val result: Memory = computer.getMemory()
     println("Answer (part 1): ${result[0]}")
 
     for (noun in 1..99) {
@@ -18,7 +21,9 @@ fun main() {
             program[1] = noun
             program[2] = verb
 
-            val output = Computer(program).runProgram().getMemory()[0]
+            computer.setProgram(program)
+            computer.runProgram()
+            val output = computer.getMemory()[0]
             if (output == 19690720) {
                 val answer: Int = 100 * noun + verb
                 println("Answer (part 2): $answer")

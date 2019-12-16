@@ -25,7 +25,6 @@ fun <T> List<T>.permutations(): Set<List<T>> = when {
 
 fun runAmplifier(phase: Int, input: Int, computer: Computer): Int = computer
     .runProgram(listOf(phase, input))
-    .getOutputs()
     .first()
 
 fun runChain(phases: List<Int>, computer: Computer) = phases.reversed().foldRight(0) { phase, input ->
