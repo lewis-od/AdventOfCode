@@ -38,6 +38,7 @@ fun part1(input: List<Int>): List<Int> {
 }
 
 // WARNING: Very very very slow
+// TODO: Can skip 0s - more 0s at larger indices => much quicker
 fun part2(input: List<Int>): List<Int> {
     var output = (0..10000).flatMap { input }
     (1..100).forEach { _ ->
