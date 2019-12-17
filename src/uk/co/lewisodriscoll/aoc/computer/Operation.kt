@@ -9,9 +9,10 @@ enum class OpCode {
     JUMP_FALSE,
     LESS_THAN,
     EQUALS,
+    SET_RELATIVE_BASE,
     TERMINATE
 }
-enum class ParamMode { POSITION, IMMEDIATE }
+enum class ParamMode { POSITION, IMMEDIATE, RELATIVE }
 
 abstract class Operation(protected val code: Int) {
     val opCode: OpCode = when (code.getTens()) {
@@ -23,6 +24,7 @@ abstract class Operation(protected val code: Int) {
         6 -> OpCode.JUMP_FALSE
         7 -> OpCode.LESS_THAN
         8 -> OpCode.EQUALS
+        9 -> OpCode.SET_RELATIVE_BASE
         99 -> OpCode.TERMINATE
         else -> throw Exception("Invalid opcode: $code")
     }
@@ -34,6 +36,7 @@ abstract class Operation(protected val code: Int) {
     protected fun intToParamMode(value: Int): ParamMode = when (value) {
         0 -> ParamMode.POSITION
         1 -> ParamMode.IMMEDIATE
+        2 -> ParamMode.RELATIVE
         else -> throw Exception("Invalid param mode: $value")
     }
 }
@@ -61,6 +64,6 @@ class TernaryOperation(code: Int) : Operation(code) {
 fun createOperation(code: Int): Operation = when(code.getTens()) {
     1, 2, 7, 8 -> TernaryOperation(code)
     5, 6 -> JumpOperation(code)
-    3, 4, 99 -> UnaryOperation(code)
+    3, 4, 9, 99 -> UnaryOperation(code)
     else -> throw Exception("Op code not implemented: ${code.getTens()}")
 }

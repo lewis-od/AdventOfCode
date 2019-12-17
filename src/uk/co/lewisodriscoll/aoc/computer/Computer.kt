@@ -5,7 +5,8 @@ class Computer(private var program: Memory, private val printOutput: Boolean = f
     private lateinit var outputs: MutableList<Int>
     private lateinit var inputs: MutableList<Int>
     private lateinit var curOp: Operation
-    private var instructionPointer: Int = 0;
+    private var instructionPointer: Int = 0
+    private var relativeBase: Int = 0
     private var initialised: Boolean = false
 
     init {
@@ -17,12 +18,14 @@ class Computer(private var program: Memory, private val printOutput: Boolean = f
         outputs = mutableListOf()
         inputs = mutableListOf()
         instructionPointer = 0
+        relativeBase = 0
         curOp = createOperation(memory[instructionPointer])
         initialised = true
     }
 
     private fun getValue(pointer: Int, mode: ParamMode): Int = when (mode) {
         ParamMode.POSITION -> memory[memory[pointer]]
+        ParamMode.RELATIVE -> memory[memory[pointer + relativeBase]]
         ParamMode.IMMEDIATE -> memory[pointer]
     }
 
@@ -63,6 +66,9 @@ class Computer(private var program: Memory, private val printOutput: Boolean = f
                 val output: Int = getValue(instructionPointer + 1, op.paramModes[0])
                 outputs.add(output)
                 if (printOutput) println("OUTPUT: $output")
+            }
+            OpCode.SET_RELATIVE_BASE -> {
+                relativeBase = getValue(instructionPointer + 1, op.paramModes[0])
             }
             else -> throw Exception("${op.opCode} not implemented")
         }
