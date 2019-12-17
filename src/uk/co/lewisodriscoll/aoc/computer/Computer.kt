@@ -15,6 +15,9 @@ class Computer(private var program: Memory, private val printOutput: Boolean = f
 
     private fun resetMemory() {
         memory = mutableListOf<Long>().apply { addAll(program) }
+        val zeros = generateSequence(0L) { _ -> 0L }.take(1000)
+        memory.addAll(zeros)
+
         outputs = mutableListOf()
         inputs = mutableListOf()
         instructionPointer = 0
@@ -25,7 +28,7 @@ class Computer(private var program: Memory, private val printOutput: Boolean = f
 
     private fun getValue(pointer: Int, mode: ParamMode): Long = when (mode) {
         ParamMode.POSITION -> memory[memory[pointer].toInt()]
-        ParamMode.RELATIVE -> memory[memory[pointer + relativeBase].toInt()]
+        ParamMode.RELATIVE -> memory[memory[pointer].toInt() + relativeBase]
         ParamMode.IMMEDIATE -> memory[pointer]
     }
 
@@ -68,7 +71,7 @@ class Computer(private var program: Memory, private val printOutput: Boolean = f
                 if (printOutput) println("OUTPUT: $output")
             }
             OpCode.SET_RELATIVE_BASE -> {
-                relativeBase = getValue(instructionPointer + 1, op.paramModes[0]).toInt()
+                relativeBase += getValue(instructionPointer + 1, op.paramModes[0]).toInt()
             }
             else -> throw Exception("${op.opCode} not implemented")
         }

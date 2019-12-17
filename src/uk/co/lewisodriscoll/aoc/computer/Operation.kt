@@ -39,12 +39,14 @@ abstract class Operation(protected val code: Int) {
         2 -> ParamMode.RELATIVE
         else -> throw Exception("Invalid param mode: $value")
     }
+
+    override public fun toString(): String = "$opCode:$paramModes"
 }
 
 class UnaryOperation(code: Int) : Operation(code) {
     override fun parseParamModes(): List<ParamMode> = when (opCode) {
         OpCode.INPUT -> listOf(ParamMode.IMMEDIATE)
-        OpCode.OUTPUT -> listOf(intToParamMode(code.getDigit(2)))
+        OpCode.OUTPUT, OpCode.SET_RELATIVE_BASE -> listOf(intToParamMode(code.getDigit(2)))
         OpCode.TERMINATE -> listOf()
         else -> throw Exception("$opCode is not a unary operation")
     }
