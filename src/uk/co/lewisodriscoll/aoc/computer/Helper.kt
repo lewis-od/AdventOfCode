@@ -6,7 +6,7 @@ fun Int.getDigit(i: Int): Int = this.digits()
     .getOrElse(i) { 0 }
 fun Int.getTens() = 10 * this.getDigit(1) + this.getDigit(0)
 
-fun Boolean.toInt(): Int = when (this) {
-    true -> 1
-    false -> 0
+fun Boolean.toLong(): Long = when (this) {
+    true -> 1L
+    false -> 0L
 }

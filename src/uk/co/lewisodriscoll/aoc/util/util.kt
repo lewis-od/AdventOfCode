@@ -8,5 +8,5 @@ fun readFile(fileName: String): List<String> = File("resources/${fileName}").rea
 fun readProgramFromFile(filename: String): Memory = readFile(filename)
     .first()
     .split(",")
-    .map(String::toInt)
+    .map(String::toLong)
     .toMutableList()

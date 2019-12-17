@@ -22,18 +22,18 @@ fun <T> List<T>.permutations(): Set<List<T>> = when {
     }
 }
 
-fun runAmplifier(phase: Int, input: Int, computer: Computer): Int = computer
-    .runProgram(listOf(phase, input))
+fun runAmplifier(phase: Long, input: Long, computer: Computer): Long = computer
+    .runProgram(listOf(phase.toInt(), input.toInt()))
     .first()
 
-fun runChain(phases: List<Int>, computer: Computer) = phases.reversed().foldRight(0) { phase, input ->
+fun runChain(phases: List<Long>, computer: Computer): Long = phases.reversed().foldRight(0L) { phase, input ->
     runAmplifier(phase, input, computer)
 }
 
-fun runLoop(phases: List<Int>, computers: List<Computer>): Int {
+fun runLoop(phases: List<Long>, computers: List<Computer>): Long {
     computers.forEachIndexed { i, computer -> computer.input(phases[i]) }
 
-    var output = 0
+    var output: Long = 0
     while (!computers.last().hasTerminated()) {
         computers.forEach { computer ->
             computer.input(output)
@@ -44,12 +44,14 @@ fun runLoop(phases: List<Int>, computers: List<Computer>): Int {
     return output
 }
 
-fun part1(program: Memory): Int  = (0..4).toList()
+fun part1(program: Memory): Long  = (0..4).toList()
+    .map(Int::toLong)
     .permutations()
     .map { runChain(it, Computer(program)) }
     .max()!!
 
 fun part2(program: Memory) = (5..9).toList()
+    .map(Int::toLong)
     .permutations()
     .map { runLoop(it, (5..9).map { Computer(program) }) }
     .max()!!
@@ -57,9 +59,9 @@ fun part2(program: Memory) = (5..9).toList()
 fun main() {
     val program: Memory = readProgramFromFile("day7.txt")
 
-    val output1: Int = part1(program)
+    val output1: Long = part1(program)
     println("Output signal (part 1): $output1")
 
-    val output2 = part2(program)
+    val output2: Long = part2(program)
     println("Output signal (part 2): $output2")
 }

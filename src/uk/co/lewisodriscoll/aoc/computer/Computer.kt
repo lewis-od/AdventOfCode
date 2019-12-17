@@ -2,8 +2,8 @@ package uk.co.lewisodriscoll.aoc.computer
 
 class Computer(private var program: Memory, private val printOutput: Boolean = false) {
     private lateinit var memory: Memory
-    private lateinit var outputs: MutableList<Int>
-    private lateinit var inputs: MutableList<Int>
+    private lateinit var outputs: Memory
+    private lateinit var inputs: Memory
     private lateinit var curOp: Operation
     private var instructionPointer: Int = 0
     private var relativeBase: Int = 0
@@ -14,61 +14,61 @@ class Computer(private var program: Memory, private val printOutput: Boolean = f
     }
 
     private fun resetMemory() {
-        memory = mutableListOf<Int>().apply { addAll(program) }
+        memory = mutableListOf<Long>().apply { addAll(program) }
         outputs = mutableListOf()
         inputs = mutableListOf()
         instructionPointer = 0
         relativeBase = 0
-        curOp = createOperation(memory[instructionPointer])
+        curOp = createOperation(memory[instructionPointer].toInt())
         initialised = true
     }
 
-    private fun getValue(pointer: Int, mode: ParamMode): Int = when (mode) {
-        ParamMode.POSITION -> memory[memory[pointer]]
-        ParamMode.RELATIVE -> memory[memory[pointer + relativeBase]]
+    private fun getValue(pointer: Int, mode: ParamMode): Long = when (mode) {
+        ParamMode.POSITION -> memory[memory[pointer].toInt()]
+        ParamMode.RELATIVE -> memory[memory[pointer + relativeBase].toInt()]
         ParamMode.IMMEDIATE -> memory[pointer]
     }
 
     private fun performTernaryOperation(op: TernaryOperation) {
-        val x: Int = getValue(instructionPointer + 1, op.paramModes[0])
-        val y: Int = getValue(instructionPointer + 2, op.paramModes[1])
-        val out: Int = memory[instructionPointer + 3]
+        val x: Long = getValue(instructionPointer + 1, op.paramModes[0])
+        val y: Long = getValue(instructionPointer + 2, op.paramModes[1])
+        val out: Int = memory[instructionPointer + 3].toInt()
 
         memory[out] = when (val opCode = op.opCode) {
             OpCode.PLUS -> x + y
             OpCode.TIMES -> x * y
-            OpCode.LESS_THAN -> (x < y).toInt()
-            OpCode.EQUALS -> (x == y).toInt()
+            OpCode.LESS_THAN -> (x < y).toLong()
+            OpCode.EQUALS -> (x == y).toLong()
             else -> throw Exception("$opCode is not a binary operation")
         }
     }
 
     private fun performJumpOperation(op: JumpOperation): Int {
-        val arg: Int = getValue(instructionPointer + 1, op.paramModes[0])
-        val target: Int = getValue(instructionPointer + 2, op.paramModes[1])
+        val arg: Long = getValue(instructionPointer + 1, op.paramModes[0])
+        val target: Long = getValue(instructionPointer + 2, op.paramModes[1])
 
         val condition: Boolean = when (val opCode = op.opCode) {
-            OpCode.JUMP_TRUE -> arg > 0
-            OpCode.JUMP_FALSE -> arg == 0
+            OpCode.JUMP_TRUE -> arg > 0L
+            OpCode.JUMP_FALSE -> arg == 0L
             else -> throw Exception("$opCode is not a binary operation")
         }
 
-        return if (condition) target else instructionPointer + 3
+        return if (condition) target.toInt() else instructionPointer + 3
     }
 
     private fun performUnaryOperation(op: UnaryOperation) {
         when (op.opCode) {
             OpCode.INPUT -> {
-                val input: Int = inputs.removeAt(0)
-                memory[memory[instructionPointer + 1]] = input
+                val input: Long = inputs.removeAt(0)
+                memory[memory[instructionPointer + 1].toInt()] = input
             }
             OpCode.OUTPUT -> {
-                val output: Int = getValue(instructionPointer + 1, op.paramModes[0])
+                val output: Long = getValue(instructionPointer + 1, op.paramModes[0])
                 outputs.add(output)
                 if (printOutput) println("OUTPUT: $output")
             }
             OpCode.SET_RELATIVE_BASE -> {
-                relativeBase = getValue(instructionPointer + 1, op.paramModes[0])
+                relativeBase = getValue(instructionPointer + 1, op.paramModes[0]).toInt()
             }
             else -> throw Exception("${op.opCode} not implemented")
         }
@@ -89,7 +89,7 @@ class Computer(private var program: Memory, private val printOutput: Boolean = f
             }
         }
 
-        curOp = createOperation(memory[instructionPointer])
+        curOp = createOperation(memory[instructionPointer].toInt())
     }
 
     private fun shouldHalt(): Boolean =
@@ -97,7 +97,7 @@ class Computer(private var program: Memory, private val printOutput: Boolean = f
 
     fun hasTerminated(): Boolean = curOp.opCode == OpCode.TERMINATE
 
-    fun input(x: Int) = inputs.add(x)
+    fun input(x: Long) = inputs.add(x)
 
     fun runUntilHalt(): Memory {
         if (!initialised) resetMemory()
@@ -117,21 +117,21 @@ class Computer(private var program: Memory, private val printOutput: Boolean = f
         return outputs
     }
 
-    fun runProgram(inputsArgs: List<Int>, forceReset: Boolean = true): List<Int> {
+    fun runProgram(inputArgs: List<Int>, forceReset: Boolean = true): Memory {
         if (!initialised || forceReset) resetMemory()
-        inputs = inputsArgs.toMutableList()
+        inputs = mutableListOf<Long>().apply { addAll(inputArgs.map(Int::toLong)) }
 
         runUntilHalt()
 
         return outputs
     }
 
-    fun runProgram(forceReset: Boolean = true): List<Int> = runProgram(listOf(), forceReset)
+    fun runProgram(forceReset: Boolean = true): Memory = runProgram(listOf(), forceReset)
 
     fun getMemory(): Memory = memory
 
     fun setProgram(newProgram: Memory) {
-        program = mutableListOf<Int>().apply { addAll(newProgram) }
+        program = mutableListOf<Long>().apply { addAll(newProgram) }
         resetMemory()
     }
 
