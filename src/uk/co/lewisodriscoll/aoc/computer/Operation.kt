@@ -40,7 +40,7 @@ abstract class Operation(protected val code: Int) {
         else -> throw Exception("Invalid param mode: $value")
     }
 
-    override public fun toString(): String = "$opCode:$paramModes"
+    public override fun toString(): String = "$opCode:$paramModes"
 }
 
 class UnaryOperation(code: Int) : Operation(code) {
