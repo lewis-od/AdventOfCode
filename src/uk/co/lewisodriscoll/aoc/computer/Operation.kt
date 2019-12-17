@@ -45,8 +45,7 @@ abstract class Operation(protected val code: Int) {
 
 class UnaryOperation(code: Int) : Operation(code) {
     override fun parseParamModes(): List<ParamMode> = when (opCode) {
-        OpCode.INPUT -> listOf(ParamMode.IMMEDIATE)
-        OpCode.OUTPUT, OpCode.SET_RELATIVE_BASE -> listOf(intToParamMode(code.getDigit(2)))
+        OpCode.INPUT, OpCode.OUTPUT, OpCode.SET_RELATIVE_BASE -> listOf(intToParamMode(code.getDigit(2)))
         OpCode.TERMINATE -> listOf()
         else -> throw Exception("$opCode is not a unary operation")
     }
@@ -58,7 +57,7 @@ class JumpOperation(code: Int) : Operation(code) {
 }
 
 class TernaryOperation(code: Int) : Operation(code) {
-    override fun parseParamModes(): List<ParamMode> = (2..3)
+    override fun parseParamModes(): List<ParamMode> = (2..4)
         .map { code.getDigit(it) }
         .map { intToParamMode(it) }
 }

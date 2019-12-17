@@ -33,7 +33,11 @@ class Computer(private var program: Memory, private val printOutput: Boolean = f
     private fun performTernaryOperation(op: TernaryOperation) {
         val x: Long = getValue(instructionPointer + 1, op.paramModes[0])
         val y: Long = getValue(instructionPointer + 2, op.paramModes[1])
-        val out: Int = memory[instructionPointer + 3].toInt()
+        val out: Int = when (val outputMode = op.paramModes[2]) {
+            ParamMode.RELATIVE -> memory[instructionPointer + 3].toInt() + relativeBase
+            ParamMode.POSITION -> memory[instructionPointer + 3].toInt()
+            else -> throw IllegalStateException("Invalid param mode $outputMode for op ${op.opCode}")
+        }
 
         memory[out] = when (val opCode = op.opCode) {
             OpCode.PLUS -> x + y
@@ -61,7 +65,11 @@ class Computer(private var program: Memory, private val printOutput: Boolean = f
         when (op.opCode) {
             OpCode.INPUT -> {
                 val input: Long = inputs.removeAt(0)
-                memory[memory[instructionPointer + 1].toInt()] = input
+                when (op.paramModes.first()) {
+                    ParamMode.RELATIVE -> memory[memory[instructionPointer + 1].toInt() + relativeBase] = input
+                    else -> memory[memory[instructionPointer + 1].toInt()] = input
+                }
+
             }
             OpCode.OUTPUT -> {
                 val output: Long = getValue(instructionPointer + 1, op.paramModes[0])
