@@ -7,7 +7,6 @@ class Computer(private var program: Memory, private val printOutput: Boolean = f
     private lateinit var curOp: Operation
     private var instructionPointer: Int = 0
     private var relativeBase: Int = 0
-    private var initialised: Boolean = false
 
     init {
         resetMemory()
@@ -23,7 +22,6 @@ class Computer(private var program: Memory, private val printOutput: Boolean = f
         instructionPointer = 0
         relativeBase = 0
         curOp = createOperation(memory[instructionPointer].toInt())
-        initialised = true
     }
 
     private fun getValue(pointer: Int, mode: ParamMode): Long = when (mode) {
@@ -103,8 +101,6 @@ class Computer(private var program: Memory, private val printOutput: Boolean = f
     fun input(x: Long) = inputs.add(x)
 
     fun runUntilHalt(): Memory {
-        if (!initialised) resetMemory()
-
         while (!shouldHalt()) {
             step()
         }
@@ -121,7 +117,7 @@ class Computer(private var program: Memory, private val printOutput: Boolean = f
     }
 
     fun runProgram(inputArgs: List<Int>, forceReset: Boolean = true): Memory {
-        if (!initialised || forceReset) resetMemory()
+        if (forceReset) resetMemory()
         inputs = mutableListOf<Long>().apply { addAll(inputArgs.map(Int::toLong)) }
 
         runUntilHalt()
