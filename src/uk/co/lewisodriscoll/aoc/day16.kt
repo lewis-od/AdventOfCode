@@ -53,6 +53,7 @@ fun part1(input: List<Int>): List<Int> {
 }
 
 // WARNING: Very very slow
+// TODO: Skip chunks and use cumulative sums
 fun part2(input: List<Int>): List<Int> {
     var output = (0..10000).flatMap { input }
     (1..100).forEach { _->
