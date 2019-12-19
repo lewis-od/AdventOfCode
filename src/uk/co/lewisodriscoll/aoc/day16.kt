@@ -2,32 +2,47 @@ package uk.co.lewisodriscoll.aoc
 
 import uk.co.lewisodriscoll.aoc.computer.getDigit
 import uk.co.lewisodriscoll.aoc.util.readFile
-import kotlin.math.ceil
-import kotlin.math.abs
+import kotlin.math.absoluteValue
 
-fun getPattern(index: Int, length: Int): List<Int> {
+typealias Pattern = List<Pair<Int, Int>>
+
+fun getPattern(index: Int): Pattern {
     val elements = listOf(0, 1, 0, -1)
-    val pattern = mutableListOf<Int>()
+    val pattern = mutableListOf<Pair<Int, Int>>()
     elements.forEach { element: Int ->
-        (0..index).forEach { _ -> pattern.add(element) }
+        pattern.add(Pair(element, index + 1))
     }
 
-    val numReps: Int = ceil(length.toFloat() / pattern.size).toInt()
-
-    return (0..numReps)
-        .flatMap { _ -> pattern }
-        .drop(1)
-        .take(length)
+    return pattern
 }
 
-fun phase(input: List<Int>): List<Int> = input.indices
-    .map { index ->
-        getPattern(index, input.size)
-            .zip(input)
-            .map { it.first * it.second }
-            .sum()
+fun flattenPattern(pattern: Pattern): Sequence<Int> {
+    val repetitions = pattern.first().second
+    var out = -1
+    var i = 0
+    return generateSequence {
+        i %= repetitions
+        if (i == 0) {
+            out *= -1
+        }
+        i++
+
+        out
     }
-    .map { abs(it).getDigit(0) }
+}
+
+fun isZeroIndex(index: Int, j: Int) = (j + 1).rem(2 * (index + 1)) <= index
+
+fun phase(input: List<Int>): List<Int> = input.indices.map { index ->
+    val pattern = getPattern(index)
+    input.asSequence()
+        .filterIndexed { j, _ -> !isZeroIndex(index, j) }
+        .zip(flattenPattern(pattern))
+        .map { it.first * it.second }
+        .sum()
+        .absoluteValue
+        .getDigit(0)
+}
 
 fun part1(input: List<Int>): List<Int> {
     var output = input
@@ -37,11 +52,10 @@ fun part1(input: List<Int>): List<Int> {
     return output.take(8)
 }
 
-// WARNING: Very very very slow
-// TODO: Can skip 0s - more 0s at larger indices => much quicker
+// WARNING: Very very slow
 fun part2(input: List<Int>): List<Int> {
     var output = (0..10000).flatMap { input }
-    (1..100).forEach { _ ->
+    (1..100).forEach { _->
         output = phase(output)
     }
     val offset = input.take(8).mapIndexed { n, x -> 10.pow(n) * x }.sum()
