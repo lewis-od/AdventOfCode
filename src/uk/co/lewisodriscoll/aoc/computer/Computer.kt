@@ -108,6 +108,8 @@ class Computer(private var program: Memory, private val printOutput: Boolean = f
 
     fun input(x: Long) = inputs.add(x)
 
+    fun input(x: Int) = input(x.toLong())
+
     fun runUntilHalt(): Memory {
         while (!shouldHalt()) {
             step()
