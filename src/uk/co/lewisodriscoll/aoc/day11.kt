@@ -60,8 +60,36 @@ class Robot(private val program: Memory) {
 
 }
 
-fun main() {
+fun part1() {
     val robot = Robot(readProgramFromFile("day11.txt"))
     robot.run()
-    println(robot.paintedTiles.size)
+    println("Tiles painted: ${robot.paintedTiles.size}")
+}
+
+fun part2() {
+    val robot = Robot(readProgramFromFile("day11.txt"))
+    robot.paintedTiles[Point(0, 0)] = Colour.WHITE
+    robot.run()
+    val paintedTiles = robot.paintedTiles
+
+    val whiteTiles = paintedTiles.filterValues { it == Colour.WHITE }.keys
+    val minX = whiteTiles.map { it.first }.min()!!
+    val minY = whiteTiles.map { it.second }.min()!!
+
+    val transformed = whiteTiles.map { it + Point(-minX, -minY) }
+    val maxX = transformed.map { it.first }.max()!!
+    val maxY = transformed.map { it.second }.max()!!
+
+    (0..maxY).reversed().forEach { y ->
+        (0..maxX).forEach { x ->
+            if (transformed.contains(Point(x, y))) print('#')
+            else print(' ')
+        }
+        println()
+    }
+}
+
+fun main() {
+    part1()
+    part2()
 }
