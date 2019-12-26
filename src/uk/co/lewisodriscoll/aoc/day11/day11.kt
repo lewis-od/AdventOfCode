@@ -1,10 +1,12 @@
-package uk.co.lewisodriscoll.aoc
+package uk.co.lewisodriscoll.aoc.day11
 
 import uk.co.lewisodriscoll.aoc.computer.Computer
 import uk.co.lewisodriscoll.aoc.computer.Memory
+import uk.co.lewisodriscoll.aoc.day3.Point
+import uk.co.lewisodriscoll.aoc.day3.plus
 import uk.co.lewisodriscoll.aoc.util.readProgramFromFile
 
-typealias Vector<T> = Pair<T, T>
+typealias Vector = Point
 
 enum class Colour {
     WHITE, BLACK

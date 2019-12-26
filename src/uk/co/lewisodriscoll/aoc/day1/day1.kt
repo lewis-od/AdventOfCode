@@ -1,4 +1,4 @@
-package uk.co.lewisodriscoll.aoc
+package uk.co.lewisodriscoll.aoc.day1
 
 import uk.co.lewisodriscoll.aoc.util.readFile
 import kotlin.math.floor

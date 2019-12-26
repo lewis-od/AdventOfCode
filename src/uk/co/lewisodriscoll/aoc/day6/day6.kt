@@ -1,4 +1,4 @@
-package uk.co.lewisodriscoll.aoc
+package uk.co.lewisodriscoll.aoc.day6
 
 import uk.co.lewisodriscoll.aoc.util.readFile
 
@@ -36,7 +36,8 @@ class Map(orbits: List<String>) {
 
         val root: Satellite = when (val existing = findByLabel(labels[0], partialMap)) {
             null -> {
-                val newSatellite: Satellite = Satellite(labels[0], null)
+                val newSatellite: Satellite =
+                    Satellite(labels[0], null)
                 newMap = arrayOf(newSatellite, *partialMap)
                 newSatellite
             }
@@ -45,7 +46,8 @@ class Map(orbits: List<String>) {
 
         when (val existing = findByLabel(labels[1], partialMap)) {
             null -> {
-                val new: Satellite = Satellite(labels[1], root)
+                val new: Satellite =
+                    Satellite(labels[1], root)
                 newMap = arrayOf(new, *newMap)
             }
             else -> {

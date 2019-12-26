@@ -1,4 +1,4 @@
-package uk.co.lewisodriscoll.aoc
+package uk.co.lewisodriscoll.aoc.day5
 
 import uk.co.lewisodriscoll.aoc.computer.Computer
 import uk.co.lewisodriscoll.aoc.computer.Memory

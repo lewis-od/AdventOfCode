@@ -1,4 +1,4 @@
-package uk.co.lewisodriscoll.aoc
+package uk.co.lewisodriscoll.aoc.day8
 
 import uk.co.lewisodriscoll.aoc.util.readFile
 
@@ -23,7 +23,10 @@ fun part1(image: Image): Int {
     val zeroCounts: List<Int> = image.map { countValues(it, 0) }
     val layerIndex: Int = zeroCounts.indexOf(zeroCounts.min())
     val winningLayer: Layer = image[layerIndex]
-    return countValues(winningLayer, 1) * countValues(winningLayer, 2)
+    return countValues(
+        winningLayer,
+        1
+    ) * countValues(winningLayer, 2)
 }
 
 fun part2(input: List<Int>, width: Int, height: Int): Layer {
@@ -48,7 +51,8 @@ fun main() {
         .map(Char::toString)
         .map(String::toInt)
 
-    val image: Image = toImage(input, width, height)
+    val image: Image =
+        toImage(input, width, height)
     val part1Answer: Int = part1(image)
     println("Answer (part 1): $part1Answer")
 

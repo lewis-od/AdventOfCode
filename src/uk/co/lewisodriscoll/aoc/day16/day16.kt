@@ -1,6 +1,7 @@
-package uk.co.lewisodriscoll.aoc
+package uk.co.lewisodriscoll.aoc.day16
 
 import uk.co.lewisodriscoll.aoc.computer.getDigit
+import uk.co.lewisodriscoll.aoc.day4.pow
 import uk.co.lewisodriscoll.aoc.util.readFile
 import kotlin.math.absoluteValue
 

@@ -1,6 +1,5 @@
-package uk.co.lewisodriscoll.aoc
+package uk.co.lewisodriscoll.aoc.day12
 
-import uk.co.lewisodriscoll.aoc.util.readFile
 import kotlin.math.abs
 
 class Moon(val x: Int, val y: Int, val z: Int, val vx: Int, val vy: Int, val vz: Int) {
@@ -38,7 +37,14 @@ fun calculateVelocity(moon: Moon, other: Moon): Moon {
         dvz += 1
     }
 
-    return Moon(moon.x, moon.y, moon.z, moon.vx + dvx, moon.vy + dvy, moon.vz + dvz)
+    return Moon(
+        moon.x,
+        moon.y,
+        moon.z,
+        moon.vx + dvx,
+        moon.vy + dvy,
+        moon.vz + dvz
+    )
 }
 
 fun updateVelocity(moon: Moon, others: List<Moon>): Moon {
@@ -48,13 +54,24 @@ fun updateVelocity(moon: Moon, others: List<Moon>): Moon {
 }
 
 fun updatePosition(moon: Moon): Moon =
-    Moon(moon.x + moon.vx, moon.y + moon.vy, moon.z + moon.vz, moon.vx, moon.vy, moon.vz)
+    Moon(
+        moon.x + moon.vx,
+        moon.y + moon.vy,
+        moon.z + moon.vz,
+        moon.vx,
+        moon.vy,
+        moon.vz
+    )
 
 fun step(moons: List<Moon>): List<Moon> = moons
     .map { updateVelocity(it, moons) }
     .map { updatePosition(it) }
 
-fun part1(moons: List<Moon>): Int = generateSequence(moons) { step(it) }
+fun part1(moons: List<Moon>): Int = generateSequence(moons) {
+    step(
+        it
+    )
+}
     .drop(1)
     .take(1000)
     .map{ it.map(Moon::getTotalEnergy).sum() }
@@ -106,7 +123,11 @@ fun part2(moons: List<Moon>): Long = listOf('x', 'y', 'z')
 
 fun moonFromString(str: String): Moon {
     val matches = Regex("\\<x=(-?\\d+),\\sy=(-?\\d+),\\sz=(-?\\d+)\\>").matchEntire(str)
-    return Moon(matches!!.groupValues[1].toInt(), matches.groupValues[2].toInt(), matches.groupValues[3].toInt())
+    return Moon(
+        matches!!.groupValues[1].toInt(),
+        matches.groupValues[2].toInt(),
+        matches.groupValues[3].toInt()
+    )
 }
 
 fun main() {
@@ -127,8 +148,14 @@ fun main() {
             "<x=3, y=5, z=-1>").split("\n").map { moonFromString(it) }
 
     listOf('x', 'y', 'z').forEach { axis ->
-        println("For $axis (old): ${cycleLengthForAxis(testInput, axis)}")
-        println("For $axis (new): ${cycleLengthForAxis2(testInput, axis)}")
+        println("For $axis (old): ${cycleLengthForAxis(
+            testInput,
+            axis
+        )}")
+        println("For $axis (new): ${cycleLengthForAxis2(
+            testInput,
+            axis
+        )}")
     }
     println(part2(testInput))
 }

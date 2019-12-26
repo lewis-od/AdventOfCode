@@ -1,10 +1,9 @@
-package uk.co.lewisodriscoll.aoc
+package uk.co.lewisodriscoll.aoc.day3
 
 import uk.co.lewisodriscoll.aoc.util.readFile
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
-
 
 typealias Point = Pair<Int, Int>
 operator fun Point.plus(x: Point): Point = Point(this.first + x.first, this.second + x.second)
