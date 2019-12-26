@@ -111,6 +111,8 @@ class Computer(private var program: Memory, private val printOutput: Boolean = f
     fun input(x: Int) = input(x.toLong())
 
     fun runUntilHalt(): Memory {
+        outputs = mutableListOf()
+
         while (!shouldHalt()) {
             step()
         }

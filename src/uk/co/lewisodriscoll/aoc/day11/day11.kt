@@ -25,7 +25,7 @@ class Robot(private val program: Memory) {
                 Colour.WHITE -> 1
             }
             computer.input(input)
-            val instructions: List<Int> = computer.runUntilHalt().map(Long::toInt).takeLast(2)
+            val instructions: List<Int> = computer.runUntilHalt().map(Long::toInt)
             paint(instructions[0])
             turn(instructions[1])
             move()
